@@ -39,18 +39,18 @@ namespace POQ.CodingChallenge.API.Endpoints
         {
             try
             {
-                var response = await _productService.Filter(request, cancellationToken);
+                var response = await _productService.FilterAsync(request, cancellationToken);
                 return Ok(response);
             }
             catch (HttpRequestException httpEx)
             {
                 if (httpEx.StatusCode == HttpStatusCode.NoContent) return NoContent();
 
-                return Problem(httpEx?.Message, null, (int?) httpEx?.StatusCode, "Mocky API error");
+                return Problem(httpEx.Message, null, (int?) httpEx.StatusCode, "Mocky API error");
             }
             catch (Exception ex)
             {
-                return Problem(ex?.Message, null, (int) HttpStatusCode.InternalServerError, "API error");
+                return Problem(ex.Message, null, (int) HttpStatusCode.InternalServerError, "API error");
             }
         }
     }

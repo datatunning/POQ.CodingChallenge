@@ -3,7 +3,6 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -31,11 +30,15 @@ namespace POQ.CodingChallenge.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add API controllers
             services.AddControllers();
 
+            // Add extra service for Diagnostic & Performance
             services.AddHealthChecks();
+            services.AddLogging();
+            services.AddMemoryCache();
 
-            // Setup CORS for basic security.
+            // Add basic Security & Regulation support
             services.AddCors(options =>
             {
                 options.AddPolicy(CorsPolicyName, builder =>
@@ -46,14 +49,7 @@ namespace POQ.CodingChallenge.API
                 });
             });
 
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => false;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
-            // Setup Swagger for API user online help.
+            // Add API Online help.
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(SwaggerEndpointVersion,
@@ -81,14 +77,11 @@ namespace POQ.CodingChallenge.API
 
             app.UseHttpsRedirection();
 
-            // Enabled middleware to set CORS policy.
             app.UseCors(CorsPolicyName);
 
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.UseCookiePolicy();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -98,7 +91,7 @@ namespace POQ.CodingChallenge.API
                 c.SwaggerEndpoint(SwaggerEndpoint, SwaggerEndpointName);
                 c.RoutePrefix = string.Empty;
             });
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

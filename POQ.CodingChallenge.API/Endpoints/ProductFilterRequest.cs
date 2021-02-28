@@ -14,7 +14,5 @@ namespace POQ.CodingChallenge.API.Endpoints
 
         public string size { get; set; }
 
-        public string hightlight { get; set; }
-
-    }
+        public string hightlight { get; set; }    }
 }
