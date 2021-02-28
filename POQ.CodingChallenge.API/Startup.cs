@@ -1,6 +1,7 @@
 // <copyright file="Startup.cs" company="Bruno DUVAL">
 // Copyright (c) Bruno DUVAL.</copyright>
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +13,7 @@ using POQ.CodingChallenge.API.Stores;
 
 namespace POQ.CodingChallenge.API
 {
+    [ExcludeFromCodeCoverage]
     public class Startup
     {
         public static string CorsPolicyName = "POQCodingChallengeOriginPolicy";

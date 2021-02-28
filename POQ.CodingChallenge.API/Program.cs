@@ -1,6 +1,7 @@
 // <copyright file="Program.cs" company="Bruno DUVAL">
 // Copyright (c) Bruno DUVAL.</copyright>
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace POQ.CodingChallenge.API
 {
+    [ExcludeFromCodeCoverage]
     public class Program
     {
         public static void Main(string[] args)

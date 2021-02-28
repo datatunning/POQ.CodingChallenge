@@ -9,14 +9,13 @@ using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
 using Ardalis.ApiEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using POQ.CodingChallenge.API.Services;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace POQ.CodingChallenge.API.Endpoints
 {
-    [Produces(MediaTypeNames.Application.Json)]
     public class
         ProductEndpoint : BaseAsyncEndpoint.WithRequest<ProductFilterRequest>.WithResponse<IList<ProductFilterResponse>>
     {
@@ -36,6 +35,10 @@ namespace POQ.CodingChallenge.API.Endpoints
             OperationId = "Product.Filter",
             Tags = new[] {nameof(ProductEndpoint)})
         ]
+        [Produces(MediaTypeNames.Application.Json)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<IList<ProductFilterResponse>>> HandleAsync(
             [FromQuery] [SwaggerParameter("The product filtering options")]ProductFilterRequest request,
             CancellationToken cancellationToken = default)

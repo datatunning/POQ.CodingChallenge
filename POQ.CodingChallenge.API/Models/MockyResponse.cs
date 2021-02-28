@@ -5,10 +5,12 @@
 // ReSharper disable InconsistentNaming
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace POQ.CodingChallenge.API.Models
 {
+    [ExcludeFromCodeCoverage]
     public class MockyResponse
     {
         [SwaggerSchema("The product list", ReadOnly = true)]

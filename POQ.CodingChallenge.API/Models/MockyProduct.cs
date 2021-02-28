@@ -4,10 +4,12 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
+using System.Diagnostics.CodeAnalysis;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace POQ.CodingChallenge.API.Models
 {
+    [ExcludeFromCodeCoverage]
     public class MockyProduct
     {
         [SwaggerSchema("The product title", ReadOnly = true)]
@@ -17,7 +19,7 @@ namespace POQ.CodingChallenge.API.Models
         public int price { get; set; }
 
         [SwaggerSchema("The list of available size for this product", ReadOnly = true)]
-        public string[] sizes { get; set; }
+        public string[] sizes { get; set; } = {};
 
         [SwaggerSchema("The product description", ReadOnly = true)]
         public string description { get; set; }

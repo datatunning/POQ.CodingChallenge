@@ -18,16 +18,16 @@ namespace POQ.CodingChallenge.API.Services
 {
     public class ProductService : IProductService
     {
-        private readonly ILogger<ProductService> _logger;
+        private readonly ILogger<IProductService> _logger;
         private readonly IMemoryCache _cache;
         private readonly IProductStore _productStore;
-        private readonly char[] _commonSeparators = {' ', '.', ';', ','};
+        public static readonly char[] CommonSeparators = {' ', '.', ';', ','};
 
         /// <summary>Initializes a new instance of the <see cref="ProductService" /> class.</summary>
         /// <param name="productStore">The product store.</param>
         /// <param name="cache"></param>
         /// <param name="logger"></param>
-        public ProductService(IProductStore productStore, IMemoryCache cache, ILogger<ProductService> logger)
+        public ProductService(IProductStore productStore, IMemoryCache cache, ILogger<IProductService> logger)
         {
             _logger?.LogInformation(
                 $"Initializing ProductService {(productStore == null ? "without" : "with")} ProductStore");
@@ -76,6 +76,7 @@ namespace POQ.CodingChallenge.API.Services
         /// </returns>
         private (int min, int max) GetPriceRange(IList<MockyProduct> products)
         {
+            if (products == null) return (0, 0);
             _cache.TryGetValue("ProductPriceRange", out (int min, int max) priceRange);
             if (priceRange.max > 0 && priceRange.max > 0) return priceRange;
 
@@ -91,10 +92,12 @@ namespace POQ.CodingChallenge.API.Services
         /// </returns>
         private string[] GetSizes(IList<MockyProduct> products)
         {
+            if (products == null) return Array.Empty<string>();
+
             _cache.TryGetValue("ProductSizes", out string[] productSize);
             if (productSize != null) return productSize;
 
-            productSize = products.SelectMany(p => p.sizes).Distinct().ToArray();
+            productSize = products?.SelectMany(p => p.sizes)?.Distinct()?.ToArray();
             _cache.Set("ProductSizes", productSize);
             return productSize;
         }
@@ -106,11 +109,13 @@ namespace POQ.CodingChallenge.API.Services
         /// </returns>
         private string[] GetKeywords(IList<MockyProduct> products)
         {
+            if (products == null) return Array.Empty<string>();
+
             _cache.TryGetValue("ProductKeywords", out string[] productKeywords);
             if (productKeywords != null) return productKeywords;
 
             productKeywords = products
-                .SelectMany(p => GetDescriptionWords(p.description, _commonSeparators))
+                .SelectMany(p => GetDescriptionWords(p.description, CommonSeparators))
                 .GroupBy(s => s)
                 .Select(g => new
                 {
@@ -122,6 +127,7 @@ namespace POQ.CodingChallenge.API.Services
                 .Skip(5)
                 .Take(10)
                 .Select(r => r.KeyField)
+                .OrderBy(s => s)
                 .ToArray();
             _cache.Set("ProductKeywords", productKeywords);
             return productKeywords;
@@ -144,16 +150,21 @@ namespace POQ.CodingChallenge.API.Services
         /// <returns></returns>
         private IEnumerable<MockyProduct> ApplyFilter(IEnumerable<MockyProduct> products, ProductFilterRequest request)
         {
-            var filteredProducts = request?.maxprice switch
+            var filteredProducts = request.maxprice switch
             {
-                null when string.IsNullOrWhiteSpace(request?.size) => products,
+                null when string.IsNullOrWhiteSpace(request.size) => products,
+                
                 <= 0 when string.IsNullOrWhiteSpace(request.size) => products,
+                
                 not null when string.IsNullOrWhiteSpace(request.size) => products.Where(p => p.price <= request.maxprice)
                     .AsParallel(),
+                
                 null when !string.IsNullOrWhiteSpace(request.size) => products
                     .Where(p => p.sizes.Contains(request.size)).AsParallel(),
+                
                 <= 0 when !string.IsNullOrWhiteSpace(request.size) => products
                     .Where(p => p.sizes.Contains(request.size)).AsParallel(),
+                
                 _ => products.Where(p => p.price <= request.maxprice && p.sizes.Contains(request.size)).AsParallel()
             };
 
@@ -170,7 +181,7 @@ namespace POQ.CodingChallenge.API.Services
         {
             if (string.IsNullOrWhiteSpace(highLights)) return products;
 
-            var keywords = highLights.Split(_commonSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var keywords = highLights.Split(CommonSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
             if (keywords.Count <= 0) return products;
 
             return products.Select(p =>

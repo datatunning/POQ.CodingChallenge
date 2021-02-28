@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -14,6 +15,7 @@ using POQ.CodingChallenge.API.Models;
 
 namespace POQ.CodingChallenge.API.Stores
 {
+    [ExcludeFromCodeCoverage]
     public class ProductStore : IProductStore
     {
         private const string MockyUrl = @"http://www.mocky.io/v2/5e307edf3200005d00858b49";
