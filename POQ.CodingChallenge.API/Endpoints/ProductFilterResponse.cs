@@ -3,37 +3,37 @@
 
 using System.Collections.Generic;
 using POQ.CodingChallenge.API.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace POQ.CodingChallenge.API.Endpoints
 {
-    public class ProductFilter
-    {
-        public int MinPrice { get; set; }
-
-        public int MaxPrice { get; set; }
-
-        public string[] Sizes { get; set; }
-
-        public string[] Keywords { get; set; } = new string[10];
-    }
-
     public class ProductFilterResponse
     {
+        /// <summary>Initializes a new instance of the <see cref="ProductFilterResponse" /> class.</summary>
+        /// <param name="products">The products.</param>
         public ProductFilterResponse(IEnumerable<MockyProduct> products)
         {
             Products = products;
             Filter = new ProductFilter();
         }
-        public ProductFilterResponse(IEnumerable<MockyProduct> products, (int, int) priceRange, string[] sizes, string[] keywords) : this(products)
+
+        /// <summary>Initializes a new instance of the <see cref="ProductFilterResponse" /> class.</summary>
+        /// <param name="products">The products.</param>
+        /// <param name="priceRange">The price range.</param>
+        /// <param name="sizes">The sizes.</param>
+        /// <param name="keywords">The keywords.</param>
+        public ProductFilterResponse(IEnumerable<MockyProduct> products, (int min, int max) priceRange, string[] sizes, string[] keywords) : this(products)
         {
-            Filter.MinPrice = priceRange.Item1;
-            Filter.MaxPrice = priceRange.Item2;
+            Filter.MinPrice = priceRange.min;
+            Filter.MaxPrice = priceRange.max;
             Filter.Sizes = sizes;
             Filter.Keywords = keywords;
         }
 
+        [SwaggerSchema("The product list", ReadOnly = true)]
         public IEnumerable<MockyProduct> Products { get; set; }
 
+        [SwaggerSchema("The options available to filter the products", ReadOnly = true)]
         public ProductFilter Filter { get; set; }
     }
 }

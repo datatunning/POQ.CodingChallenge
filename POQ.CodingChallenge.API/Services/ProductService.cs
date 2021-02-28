@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using POQ.CodingChallenge.API.Endpoints;
 using POQ.CodingChallenge.API.Models;
@@ -17,19 +18,22 @@ namespace POQ.CodingChallenge.API.Services
 {
     public class ProductService : IProductService
     {
+        private readonly ILogger<ProductService> _logger;
         private readonly IMemoryCache _cache;
-        private readonly char[] _commonSeparators = {' ', '.', ';'};
         private readonly IProductStore _productStore;
+        private readonly char[] _commonSeparators = {' ', '.', ';', ','};
 
         /// <summary>Initializes a new instance of the <see cref="ProductService" /> class.</summary>
         /// <param name="productStore">The product store.</param>
         /// <param name="cache"></param>
-        public ProductService(IProductStore productStore, IMemoryCache cache)
+        /// <param name="logger"></param>
+        public ProductService(IProductStore productStore, IMemoryCache cache, ILogger<ProductService> logger)
         {
-            Console.WriteLine(
+            _logger?.LogInformation(
                 $"Initializing ProductService {(productStore == null ? "without" : "with")} ProductStore");
             _productStore = productStore;
             _cache = cache;
+            _logger = logger;
         }
 
         /// <inheritdoc />
@@ -37,7 +41,7 @@ namespace POQ.CodingChallenge.API.Services
             CancellationToken cancellationToken = default)
         {
             // ReSharper disable once MethodHasAsyncOverload
-            Console.WriteLine(
+            _logger?.LogInformation(
                 $"Received product filter request : {JsonConvert.SerializeObject(request, Formatting.Indented)}");
 
             var products = await GetProductsAsync(cancellationToken);
@@ -144,8 +148,10 @@ namespace POQ.CodingChallenge.API.Services
             {
                 null when string.IsNullOrWhiteSpace(request?.size) => products,
                 <= 0 when string.IsNullOrWhiteSpace(request.size) => products,
-                > 0 when string.IsNullOrWhiteSpace(request.size) => products.Where(p => p.price <= request.maxprice)
+                not null when string.IsNullOrWhiteSpace(request.size) => products.Where(p => p.price <= request.maxprice)
                     .AsParallel(),
+                null when !string.IsNullOrWhiteSpace(request.size) => products
+                    .Where(p => p.sizes.Contains(request.size)).AsParallel(),
                 <= 0 when !string.IsNullOrWhiteSpace(request.size) => products
                     .Where(p => p.sizes.Contains(request.size)).AsParallel(),
                 _ => products.Where(p => p.price <= request.maxprice && p.sizes.Contains(request.size)).AsParallel()
@@ -167,15 +173,22 @@ namespace POQ.CodingChallenge.API.Services
             var keywords = highLights.Split(_commonSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
             if (keywords.Count <= 0) return products;
 
-            products.ForEach(p =>
+            return products.Select(p =>
             {
-                keywords.ForEach(hWord => p.description = new StringBuilder(p.description)
+                var np = new MockyProduct()
+                {
+                    price = p.price,
+                    sizes = p.sizes,
+                    title = p.title,
+                    description = p.description
+                };
+
+                keywords.ForEach(hWord => np.description = new StringBuilder(np.description)
                     .Replace(hWord, $"<em>{hWord}</em>")
                     .ToString()
                 );
+                return np;
             });
-
-            return products;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using POQ.CodingChallenge.API.Models;
 
@@ -16,13 +17,19 @@ namespace POQ.CodingChallenge.API.Stores
     public class ProductStore : IProductStore
     {
         private const string MockyUrl = @"http://www.mocky.io/v2/5e307edf3200005d00858b49";
+        private readonly ILogger<ProductStore> _logger;
+
+        public ProductStore(ILogger<ProductStore> logger)
+        {
+            _logger = logger;
+        }
 
         /// <inheritdoc />
         public async Task<IList<MockyProduct>> RealAll(CancellationToken cancellationToken = default)
         {
             try
             {
-                Console.WriteLine("Retrieving (mocky) products");
+                _logger.LogInformation("Retrieving (mocky) products");
                 using var httpClient = new HttpClient();
                 var response = await httpClient.GetFromJsonAsync<MockyResponse>(MockyUrl, cancellationToken);
 
@@ -35,17 +42,17 @@ namespace POQ.CodingChallenge.API.Stores
             {
                 if (httpEx.StatusCode == HttpStatusCode.NoContent)
                 {
-                    Console.WriteLine("Mocky did not returned any products.");
+                    _logger.LogWarning("Mocky did not returned any products.");
                     return new List<MockyProduct>();
                 }
 
-                Console.WriteLine(
+                _logger.LogError(
                     $"An error occurred while retrieving the mocky product. StatusCode: {httpEx.StatusCode}, Message: {httpEx.Message}");
                 throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An unhandled error occurred while retrieving the mocky products. {ex.Message}");
+                _logger.LogError($"An unhandled error occurred while retrieving the mocky products. {ex.Message}");
                 throw;
             }
         }

@@ -2,7 +2,11 @@
 // Copyright (c) Bruno DUVAL.</copyright>
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 
 namespace POQ.CodingChallenge.API
 {
@@ -15,6 +19,12 @@ namespace POQ.CodingChallenge.API
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                    logging.AddDebug();
+                })
+                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
     }
 }
