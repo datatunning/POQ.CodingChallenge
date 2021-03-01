@@ -1,4 +1,4 @@
-# Backend WebAPI
+# Backend WebAPI [![Continuous-Integration](https://github.com/datatunning/POQ.CodingChallenge/actions/workflows/dotnet.yml/badge.svg)](https://github.com/datatunning/POQ.CodingChallenge/actions/workflows/dotnet.yml) [![codecov](https://codecov.io/gh/datatunning/POQ.CodingChallenge/branch/main/graph/badge.svg?token=LNR1LLZJJ9)](https://codecov.io/gh/datatunning/POQ.CodingChallenge)
 
 Create a .NET Core solution to contain an HTTP endpoint that:
 
